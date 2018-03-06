@@ -1,8 +1,5 @@
 **ECG processing**
-<<<<<<< HEAD
 
-=======
->>>>>>> 84f85db0ef2002dcd4d6023be9bc5714c02d45e7
 Provides standard linear time-domain, linear frequency-domain, and non-linear ECG processing functions (Support vector machine-based arrhythmia classification using reduced features of heart rate variability signal 2.2.2 https://pdfs.semanticscholar.org/0c5d/2c9a7540dd3ee6f708e3671d8c9352c2ff8b.pd ). All features are based on the R-R intervals.
 
 The functions are designed to work with records from physionet.org. Records from physionet.org can be downloaded and saved using retrieve_physio_files.py.
@@ -27,7 +24,4 @@ The functions are designed to work with records from physionet.org. Records from
   * Lyapunov exponent (LLE).
   * Detrended fluctuation analysis (DFA).
   * Sequential trend analysis (STA).
-<<<<<<< HEAD
-=======
-  
->>>>>>> 84f85db0ef2002dcd4d6023be9bc5714c02d45e7
+
