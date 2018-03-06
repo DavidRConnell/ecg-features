@@ -10,7 +10,7 @@ The functions are designed to work with records from physionet.org. Records from
   * Root mean square successive difference (RMSSD).
   * Standard deviation between normal-normal (R-R) intervals (SDNN).
   * Standard deviation between successive differences (SDSD).
-  * Probability successive normal-normal (R-R) intervals differ by greater than t (standard t = 50, 10, or 5) (pNNt).
+  * Probability successive normal-normal (R-R) intervals differ by greater than t (standard t = 50, 10, or 5) (pNN).
 
 *Linear frequency-domain functions*
 
