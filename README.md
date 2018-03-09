@@ -10,11 +10,13 @@ The functions are designed to work with records from physionet.org. Records from
   * Root mean square successive difference (RMSSD).
   * Standard deviation between normal-normal (R-R) intervals (SDNN).
   * Standard deviation between successive differences (SDSD).
-  * Probability successive normal-normal (R-R) intervals differ by greater than t (standard t = 50, 10, or 5) (pNN).
+  * Probability successive normal-normal (R-R) intervals differ by greater than
+  t (standard t = 50, 10, or 5) (pNN).
 
 *Linear frequency-domain functions*
 
-  * Ratio of the low-frequency (LF) and high-frequency (HF) bands (LF_over_HF).
+  * Power spectral analysis (PSA). Ratio of the low-frequency (LF) and
+  high-frequency (HF) bands.
 
 *Non-linear*
 
@@ -24,4 +26,3 @@ The functions are designed to work with records from physionet.org. Records from
   * Lyapunov exponent (LLE).
   * Detrended fluctuation analysis (DFA).
   * Sequential trend analysis (STA).
-
