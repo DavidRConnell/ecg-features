@@ -4,7 +4,7 @@ should be input as an np.array of R-R intervals. Arrays can be
 multi-dimensional as long as axis 1 moves through time (i.e. inputs should
 have shapes (n,) or (m, n)).
 
-Provides functions: mean, RMSSD, SDNN, SDSD, and pNN.
+Includes functions: mean, rmssd, sdnn, sdsd, and pnn.
 """
 
 import numpy as np
@@ -17,14 +17,14 @@ def _function_dimension(x):
 
 
 def mean(intervals):
-    """ Mean of intervals. """
+    """ Mean of R-R intervals. """
 
     axis = _function_dimension(intervals)
     return intervals.mean(axis=axis)
 
 
-def RMSSD(intervals):
-    """ Root mean square of successive differences. """
+def rmssd(intervals):
+    """ Root mean square of successive differences of R-R intervals. """
 
     axis = _function_dimension(intervals)
     differences = np.diff(intervals, axis=axis)
@@ -33,24 +33,25 @@ def RMSSD(intervals):
     return rms
 
 
-def SDNN(intervals):
-    """ Standard deviation of intervals. """
+def sdnn(intervals):
+    """ Standard deviation of R-R intervals. """
 
     axis = _function_dimension(intervals)
     return intervals.std(axis=axis, ddof=1)
 
 
-def SDSD(intervals):
-    """ Standard deviation of the successive differences. """
+def sdsd(intervals):
+    """ Standard deviation of the successive differences of R-R intervals. """
 
     axis = _function_dimension(intervals)
     differences = np.diff(intervals, axis=axis)
     return differences.std(axis=axis, ddof=1)
 
 
-def pNN(intervals, min_time=10):
-    """ Percent of successive differences greater than min_time (in same units
-    as R-R intervals). """
+def pnn(intervals, min_time=10):
+    """ Percent of successive R-R interval differences greater than min_time
+    (in same units as R-R intervals). Default min_time is intended to be in
+    ms. """
 
     axis = _function_dimension(intervals)
 
