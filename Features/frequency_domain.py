@@ -7,7 +7,7 @@ have shapes (n,) or (m, n)).
 Includes function: psa (power spectral analysis).
 """
 
-from scipy import fftpack
+from scipy.fftpack import fft, fftfreq
 import numpy as np
 
 LF_RANGE = (0.04, 0.15)
@@ -21,8 +21,8 @@ def psa(intervals, sampling_freq):
     size = intervals.shape[axis]
     period = 1.0 / sampling_freq
 
-    power_spec = np.abs(fftpack.fft(intervals, axis=axis)) ** 2
-    freqs = fftpack.fftfreq(size, d=period)
+    power_spec = np.abs(fft(intervals, axis=axis)) ** 2
+    freqs = fftfreq(size, d=period)
     LF = np.sum(power_spec.T[_between(freqs, *LF_RANGE)].T, axis=axis)
     HF = np.sum(power_spec.T[_between(freqs, *HF_RANGE)].T, axis=axis)
 
