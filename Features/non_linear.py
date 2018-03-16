@@ -191,19 +191,3 @@ def spen(intervals):
     probs = spectrum / np.array([spectrum.sum(axis=axis)]).T
 
     return - np.sum(probs * np.log2(probs), axis=axis)
-
-
-# def dfa(intervals):
-#     """ Detrended fluctuation analysis. """
-#
-#     avg_RR = time_domain.mean(intervals)
-#     RR_i = _get_interbeats(intervals)
-#
-#
-# def _get_interbeats(intervals):
-#
-#     size = intervals.shape
-#     indeces = np.meshgrid()
-
-vals = np.random.rand(10, 10000)
-print csi(vals)
