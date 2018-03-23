@@ -33,7 +33,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 import wfdb
 
-SAVE_PATH = '/Volumes/PhysioNet' # Change this line to change save location.
+#%% Change this line to change save location. %%#
+# SAVE_PATH = '/Volumes/PhysioNet' # macOS
+SAVE_PATH = '/run/media/david/PhysioNet' # manjaro
 SAVE_PATH += '/RecordFiles'
 
 # Add database name and annotation extension if missing.
@@ -54,38 +56,39 @@ def get_record_list(database):
 
     return re.findall(r'[\S]+', record_file)
 
+
 class Record(wfdb.Record):
     """ Modifies wfdb.Record class to include annotations and adds __getitem__
     and time_slice methods. """
 
     def __init__(self, record, ann):
         super(Record, self).__init__(
-            p_signals=record.p_signals,
-            d_signals=record.d_signals,
-            e_p_signals=record.e_p_signals,
-            e_d_signals=record.e_d_signals,
-            recordname=record.recordname,
-            nsig=record.nsig,
+            p_signal=record.p_signal,
+            d_signal=record.d_signal,
+            e_p_signal=record.e_p_signal,
+            e_d_signal=record.e_d_signal,
+            record_name=record.record_name,
+            file_name=record.file_name,
+            n_sig=record.n_sig,
             fs=record.fs,
-            counterfreq=record.counterfreq,
-            basecounter=record.basecounter,
-            siglen=record.siglen,
-            basetime=record.basetime,
-            basedate=record.basedate,
-            filename=record.filename,
+            counter_freq=record.counter_freq,
+            base_counter=record.base_counter,
+            sig_len=record.sig_len,
+            base_time=record.base_time,
+            base_date=record.base_date,
             fmt=record.fmt,
-            sampsperframe=record.sampsperframe,
+            samps_per_frame=record.samps_per_frame,
             skew=record.skew,
-            byteoffset=record.byteoffset,
-            adcgain=record.adcgain,
+            byte_offset=record.byte_offset,
+            adc_gain=record.adc_gain,
             baseline=record.baseline,
             units=record.units,
-            adcres=record.adcres,
-            adczero=record.adczero,
-            initvalue=record.initvalue,
+            adc_res=record.adc_res,
+            adc_zero=record.adc_zero,
+            init_value=record.init_value,
             checksum=record.checksum,
-            blocksize=record.blocksize,
-            signame=record.signame,
+            block_size=record.block_size,
+            sig_name=record.sig_name,
             comments=record.comments
         )
 
@@ -174,8 +177,8 @@ def get_record(file_name, database, overwrite=False, save=True):
     def get_annotations():
         """ Gets the record's annotations. """
 
-        ann = wfdb.rdann(file_name, annotation_ext, pbdir=database)
-        signal_end = len(record.p_signals[0])
+        ann = wfdb.rdann(file_name, annotation_ext, pb_dir=database)
+        signal_end = len(record.p_signal[0])
         indeces_within_signal = ann.sample < signal_end # Some annotations
         ann.sample = ann.sample[indeces_within_signal]  # go past signal.
         ann.symbol = np.array(ann.symbol)
@@ -201,8 +204,20 @@ def get_record(file_name, database, overwrite=False, save=True):
 
     try:
         print 'Downloading file %s...' % file_name
-        record = wfdb.rdsamp(file_name, pbdir=database)
-        record.p_signals = record.p_signals.T
+        sampfrom = 0
+        sampto = 'end'
+        channels = 'all'
+        record = wfdb.rdrecord(
+            file_name,
+            sampfrom,
+            sampto,
+            channels,
+            True,
+            database,
+            True
+        )
+
+        record.p_signal = record.p_signal.T
         print 'Record downloaded. \nDownloading annotations...'
 
         ann = get_annotations()
@@ -262,7 +277,7 @@ def _save(record, database, update=True):
     file_path = (
         SAVE_PATH + '/' + \
         database + '/' + \
-        record.recordname + \
+        record.record_name + \
         '.pkl'
     )
 
@@ -317,7 +332,7 @@ def plot_record(
     def check_channel_index():
         """ Make sure the channel to plot exists. """
 
-        num_channels = len(record.p_signals)
+        num_channels = len(record.p_signal)
         err_msg = ('Channel %d out of bounds. Record has only %d channels.'
                    % (channel, num_channels))
 
@@ -351,10 +366,10 @@ def plot_record(
     channel_index = channel - 1
     check_channel_index()
 
-    signal = record.p_signals[channel_index]
+    signal = record.p_signal[channel_index]
     time = convert_samples_to_time(record)
 
-    plt.figure('Record %s' % record.recordname)
+    plt.figure('Record %s' % record.record_name)
     plt.plot(time, signal)
     plot_annotations()
     plt.xlabel('time (s)')
@@ -366,7 +381,7 @@ def convert_samples_to_time(record):
     time, in seconds. Returns an array of times. """
 
     samp_freq = record.fs
-    signal = record.p_signals[0]
+    signal = record.p_signal[0]
     time = np.linspace(0, float(len(signal))/samp_freq, len(signal))
     return time
 
