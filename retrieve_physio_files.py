@@ -14,12 +14,6 @@ Example:
     >>> plot_record(record)
     >>> plt.show()
 
-Modifications to the wfdb package:
-
-    * Change show_ann_labels().
-        1. Open annotations.py in wfdb.readwrite (found with wfdb.__path__()).
-        2. Change print(ann_label_table) to return(ann_label_table) in the
-        show_ann_labels() function.
 """
 
 import os
@@ -34,8 +28,8 @@ import matplotlib.pyplot as plt
 import wfdb
 
 #%% Change this line to change save location. %%#
-# SAVE_PATH = '/Volumes/PhysioNet' # macOS
-SAVE_PATH = '/run/media/david/PhysioNet' # manjaro
+SAVE_PATH = '/Volumes/PhysioNet' # macOS
+# SAVE_PATH = '/run/media/david/PhysioNet' # manjaro
 SAVE_PATH += '/RecordFiles'
 
 # Add database name and annotation extension if missing.
@@ -404,9 +398,9 @@ def get_symbol_labels():
 
 
 def get_ann_symbol_table():
-    """ I just don't like the name show_ann_labels. """
+    """ Returns a table of annotation labels. """
 
-    return wfdb.show_ann_labels()
+    return wfdb.io.annotation.ann_label_table
 
 
 def does_record_contain_ann_symbol(record, symbol):
@@ -439,3 +433,7 @@ def does_record_contain_ann_symbol(record, symbol):
     list_of_symbols = re.findall(test_symbol, record_symbols)
 
     return list_of_symbols
+
+rec = get_record('101', 'mitdb')
+plot_record(rec)
+plt.show()
