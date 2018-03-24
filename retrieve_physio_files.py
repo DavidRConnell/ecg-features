@@ -433,3 +433,7 @@ def does_record_contain_ann_symbol(record, symbol):
     list_of_symbols = re.findall(test_symbol, record_symbols)
 
     return list_of_symbols
+
+rec = get_record('101', 'mitdb')
+plot_record(rec)
+plt.show()
