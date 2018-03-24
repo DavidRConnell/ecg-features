@@ -1,4 +1,4 @@
-**ECG proccesing**
+**ECG features**
 
 Provides standard linear time-domain, linear frequency-domain, and non-linear ECG processing functions (Support vector machine-based arrhythmia classification using reduced features of heart rate variability signal 2.2.2 https://pdfs.semanticscholar.org/0c5d/2c9a7540dd3ee6f708e3671d8c9352c2ff8b.pd ). All features are based on the R-R intervals.
 
@@ -23,6 +23,6 @@ The functions are designed to work with records from physionet.org. Records from
   * Cardiac-Sympathetic index (CSI).
   * Approximate entropy (ApEn).
   * Spectral entropy (SpEn).
-  * Lyapunov exponent (LLE).
+  * Largest lyapunov exponent (LLE).
   * Detrended fluctuation analysis (DFA).
   * Sequential trend analysis (STA).
