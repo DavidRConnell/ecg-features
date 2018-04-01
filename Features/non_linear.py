@@ -4,11 +4,11 @@ as an np.array of R-R intervals. Arrays can be multi-dimensional as long as
 axis 1 moves through time (i.e. inputs should have shapes (n,) or (m, n)).
 
 Includes function: csi (cardiac sympathatic index) apen (approximate entropy),
-spen (spectral entropy).
+spen (spectral entropy), lle (largest Lypunov exponent).
 """
 
 import numpy as np
-from scipy.fftpack import fft
+from scipy.fftpack import fft, ifft
 
 
 def csi(intervals, num_points=10):
@@ -35,11 +35,10 @@ def csi(intervals, num_points=10):
 
     sd1, sd2 = _sd(intervals, num_points)
 
-
     sd2[sd1 == 0] = 1
     sd1[sd1 == 0] = 1
 
-    return (sd2 / sd1).T
+    return (sd2 / sd1).T.mean(axis=1)
 
 
 def _sd(intervals, num_points):
@@ -59,9 +58,9 @@ def _sd(intervals, num_points):
     y = windowed_intervals[1:]
 
     def _means(x, y):
-        meanx = x.mean(axis=1)
-        meany = y.mean(axis=1)
-        return(meanx, meany)
+        mean_x = x.mean(axis=1)
+        mean_y = y.mean(axis=1)
+        return(mean_x, mean_y)
 
     def _transpose(vals):
         if axis == 0:
@@ -69,16 +68,16 @@ def _sd(intervals, num_points):
         else:
             return vals.swapaxes(0, axis)
 
-    meanx, meany = _means(x, y)
+    mean_x, mean_y = _means(x, y)
 
     def _sd1():
-        mean = _transpose(np.array([meany - meanx]))
+        mean = _transpose(np.array([mean_y - mean_x]))
 
         sd1 = np.std((x - y) + mean, axis=1) / (2.0 ** 0.5)
         return sd1
 
     def _sd2():
-        mean = _transpose(np.array([meanx + meany]))
+        mean = _transpose(np.array([mean_x + mean_y]))
 
         sd2 = np.std((x + y) - mean, axis=1) / (2.0 ** 0.5)
         return sd2
@@ -111,7 +110,7 @@ def apen(intervals, m=2, r=0.6):
         r (float): max distance between close groups.
     """
 
-    heart_rates = 1.0 / intervals
+    heart_rates = 1 / intervals.astype(np.float32)
 
     num_close_groups_m = _find_num_close_groups(heart_rates, m, r)
     num_close_groups_m_plus_1 = _find_num_close_groups(heart_rates, m+1, r)
@@ -136,8 +135,9 @@ def _find_num_close_groups(heart_rates, m, r):
     else:
         dist_mat = _multi_dim_distance_matrix(heart_rates)
 
-    far_vals = np.greater(dist_mat, r)
-    return _sum_num_close_groups(far_vals, m).astype(float)
+    far_vals = np.logical_or(np.greater(dist_mat, r), np.less(dist_mat, -r))
+
+    return _sum_num_close_groups(far_vals, m).astype(np.float32)
 
 
 def _function_dimension(x):
@@ -149,18 +149,19 @@ def _function_dimension(x):
 
 def _one_dim_distance_matrix(vals):
     repeats = np.tile(vals, (vals.shape[0], 1))
-    return np.abs(repeats - repeats.T)
+    return repeats - repeats.T
 
 
 def _multi_dim_distance_matrix(vals):
     vals = _rotate_and_repeat(vals)
-    return np.abs(vals - np.swapaxes(vals, 0, 1))
+    return vals - np.swapaxes(vals, 0, 1)
 
 
 def _rotate_and_repeat(vals):
-    size = vals.shape
     vals = np.swapaxes(np.array([vals]), 1, 2)
-    return np.repeat(vals, size[1], axis=0)
+    size = vals.shape
+    new_size = (size[1],) + size[1:]
+    return np.broadcast_to(vals, new_size)
 
 
 def _sum_num_close_groups(group_dist_mat, m):
@@ -169,6 +170,7 @@ def _sum_num_close_groups(group_dist_mat, m):
 
 def _is_group_close(far_vals, m):
     close_groups = 0
+
     for str_idx in xrange(m):
         end_idx = m - str_idx
         close_groups += far_vals[str_idx:-end_idx, str_idx:-end_idx]
@@ -191,3 +193,36 @@ def spen(intervals):
     probs = spectrum / np.array([spectrum.sum(axis=axis)]).T
 
     return - np.sum(probs * np.log2(probs), axis=axis)
+
+
+def lle(intervals):
+    """ Largest Lypunov exponent (LLE) is a measure chaos within a signal.
+    If the LLE of a signal is positive the signal is determined to be chaotic.
+    The Lypunov exponent of each dimension represents how quickly two initially
+    close points move apart from one another.
+
+    This method of calculating the LLE is based on M. Rosenstein, J. Collins,
+    and C. De Luca's method from "A practical method for calculating largest
+    Lypunov exponents from small data sets".
+    """
+
+    dim = _function_dimension(intervals)
+    j = _calc_j_from_autocorr(intervals, dim)
+
+
+def _calc_j_from_autocorr(intervals, axis):
+
+    Intervals = fft(intervals, axis=axis)
+    Corr = np.abs(Intervals ** 2)
+    corr = ifft(Corr, axis=axis).real
+
+    if axis is 0:
+        corr = corr[:len(corr) / 2] / corr[0]
+    else:
+        corr = corr[:, :corr.shape[1] / 2] / np.array([corr[:, 0]]).T
+
+    diminish_factor = 1 - 1/np.exp(1)
+    lag_vals = np.abs(corr - diminish_factor)
+    min_val = np.argmin(lag_vals, axis=axis)
+
+    return min_val
